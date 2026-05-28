@@ -1,0 +1,262 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-navy: #1a1a2e;
+  --color-charcoal: #16213e;
+  --color-crimson: #C41E3A;
+  --color-darkred: #8B0000;
+  --color-warm: #fafafa;
+  --color-warm-dim: #e0e0e0;
+  --color-navy-light: #2a2a4e;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-navy);
+  color: var(--color-warm);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* ------------------------------------------------------------------ */
+/*  PAGE TRANSITION                                                    */
+/* ------------------------------------------------------------------ */
+.page-enter {
+  animation: pageEnter 0.5s ease-out both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  SCROLL-TRIGGERED FADE-IN                                           */
+/* ------------------------------------------------------------------ */
+.fade-in {
+  opacity: 0;
+  transform: translateY(32px);
+  animation: fadeInUp 0.8s ease forwards;
+  animation-play-state: paused;
+}
+
+.fade-in.visible {
+  animation-play-state: running;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger > *:nth-child(1) { animation-delay: 0s; }
+.stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger > *:nth-child(9) { animation-delay: 0.45s; }
+
+/* ------------------------------------------------------------------ */
+/*  DECORATIVE BACKGROUNDS                                             */
+/* ------------------------------------------------------------------ */
+.x-pattern {
+  background-image:
+    radial-gradient(circle, rgba(196, 30, 58, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.x-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='24' y='28' text-anchor='middle' font-size='10' fill='rgba(196,30,58,0.06)' font-family='sans-serif'%3Ex%3C/text%3E%3C/svg%3E");
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.plus-field {
+  background-image:
+    url("data:image/svg+xml,%3Csvg width='64' height='64' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='32' y='36' text-anchor='middle' font-size='12' fill='rgba(196,30,58,0.08)' font-family='sans-serif'%3E%2B%3C/text%3E%3C/svg%3E");
+  background-size: 64px 64px;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-crimson), #ff4d6a, var(--color-crimson));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ------------------------------------------------------------------ */
+/*  NAV LINK UNDERLINE                                                 */
+/* ------------------------------------------------------------------ */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: var(--color-crimson);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  HOVER STATES — BUTTONS                                             */
+/* ------------------------------------------------------------------ */
+.cta-glow {
+  box-shadow: 0 0 0 0 rgba(196, 30, 58, 0.4);
+  transition: box-shadow 0.3s ease, transform 0.2s ease, filter 0.2s ease;
+}
+
+.cta-glow:hover {
+  box-shadow: 0 0 24px 4px rgba(196, 30, 58, 0.3);
+  transform: translateY(-1px) scale(1.02);
+  filter: brightness(1.1);
+}
+
+.cta-glow:active {
+  transform: translateY(0) scale(0.99);
+}
+
+button,
+a[class*="bg-crimson"],
+a[class*="bg-navy"] {
+  transition: transform 0.2s ease, filter 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover,
+a[class*="bg-crimson"]:hover,
+a[class*="bg-navy"]:hover {
+  transform: scale(1.02);
+  filter: brightness(1.08);
+}
+
+button:active,
+a[class*="bg-crimson"]:active,
+a[class*="bg-navy"]:active {
+  transform: scale(0.99);
+}
+
+/* ------------------------------------------------------------------ */
+/*  HOVER STATES — CARDS                                               */
+/* ------------------------------------------------------------------ */
+.card-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(196, 30, 58, 0.1);
+}
+
+/* ------------------------------------------------------------------ */
+/*  HOVER STATES — INLINE LINKS                                        */
+/* ------------------------------------------------------------------ */
+.link-slide {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-slide::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.link-slide:hover::after {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------ */
+/*  PILLAR & STORY ELEMENTS                                            */
+/* ------------------------------------------------------------------ */
+.pillar-item {
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pillar-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pillar-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-crimson), var(--color-darkred));
+  transition: width 0.4s ease;
+}
+
+.pillar-item:hover::after {
+  width: 100%;
+}
+
+.story-placeholder {
+  background: linear-gradient(145deg, var(--color-charcoal), var(--color-navy-light), var(--color-charcoal));
+  background-size: 200% 200%;
+  animation: shimmer 6s ease infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ------------------------------------------------------------------ */
+/*  FORM ELEMENTS                                                      */
+/* ------------------------------------------------------------------ */
+input:focus {
+  outline: 2px solid var(--color-crimson);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  SCROLLBAR                                                          */
+/* ------------------------------------------------------------------ */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-navy);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-charcoal);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-crimson);
+}
