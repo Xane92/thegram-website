@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 const EVENTS = [
   {
     date: "Jul 18",
@@ -29,13 +33,39 @@ const EVENTS = [
   },
 ];
 
+function TicketEmbed() {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className="relative fade-in">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-navy rounded-lg z-10">
+          <div className="text-center">
+            <div className="inline-block w-6 h-6 border-2 border-crimson/30 border-t-crimson rounded-full animate-spin mb-4" />
+            <p className="text-sm tracking-[0.2em] uppercase text-crimson">
+              Loading tickets...
+            </p>
+          </div>
+        </div>
+      )}
+      <iframe
+        src="https://gramtickets.com"
+        title="TheGram Tickets"
+        onLoad={() => setLoaded(true)}
+        className="w-full min-h-[400px] sm:min-h-[600px] rounded-lg border border-charcoal bg-navy"
+        allow="payment"
+      />
+    </div>
+  );
+}
+
 export default function EventsPage() {
   return (
     <>
       {/* Hero */}
       <section className="relative pt-36 pb-20 sm:pt-44 sm:pb-28 bg-charcoal plus-field overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--color-charcoal)_75%)] pointer-events-none" />
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center page-enter">
+        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
           <p className="mb-4 text-[0.65rem] tracking-[0.5em] uppercase text-crimson/80">
             + &nbsp; Live &nbsp; +
           </p>
@@ -68,7 +98,6 @@ export default function EventsPage() {
                 className="group bg-navy hover:bg-charcoal transition-colors duration-300 p-8 sm:p-10 fade-in"
               >
                 <div className="flex items-start gap-6">
-                  {/* Date badge */}
                   <div className="shrink-0 w-20 h-20 bg-crimson/10 border border-crimson/20 flex flex-col items-center justify-center">
                     <span className="text-xl font-bold font-serif text-crimson leading-none">
                       {ev.date.split(" ")[1]}
@@ -103,11 +132,8 @@ export default function EventsPage() {
       </section>
 
       {/* Tickets & Booking */}
-      <section
-        id="tickets"
-        className="bg-charcoal py-20 sm:py-28 plus-field"
-      >
-        <div className="mx-auto max-w-3xl px-6 lg:px-10">
+      <section id="tickets" className="bg-charcoal py-20 sm:py-28 plus-field">
+        <div className="mx-auto max-w-4xl px-6 lg:px-10">
           <div className="text-center mb-12 fade-in">
             <p className="text-[0.65rem] tracking-[0.5em] uppercase text-crimson mb-3">
               + &nbsp; Booking &nbsp; +
@@ -121,17 +147,7 @@ export default function EventsPage() {
             </p>
           </div>
 
-          <div className="fade-in border border-white/10 border-dashed bg-navy/50 p-12 sm:p-16 text-center">
-            <div className="text-warm-dim/20 text-5xl font-serif font-bold mb-4 select-none">
-              +
-            </div>
-            <p className="text-sm tracking-[0.15em] text-warm-dim/40 uppercase">
-              Ticketing widget will be embedded here
-            </p>
-            <p className="mt-3 text-[0.7rem] text-warm-dim/25">
-              Integration coming soon
-            </p>
-          </div>
+          <TicketEmbed />
         </div>
       </section>
     </>
