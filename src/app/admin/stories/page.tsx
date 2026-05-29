@@ -1,10 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase, type Story } from "@/lib/supabase";
 
+const CATEGORIES = [
+  "music",
+  "culture",
+  "film",
+  "fashion",
+  "events",
+  "finance",
+  "policies",
+  "startups",
+  "lifestyle",
+];
+
+type CategoryStats = {
+  name: string;
+  total: number;
+  published: number;
+  draft: number;
+};
+
 export default function AdminStoriesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -13,16 +37,15 @@ export default function AdminStoriesPage() {
     type: "success" | "error";
   } | null>(null);
 
-  function showToast(
-    message: string,
-    type: "success" | "error" = "success"
-  ) {
+  const activeCategory = categoryParam ?? "all";
+
+  function showToast(message: string, type: "success" | "error" = "success") {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchStories() {
       const { data, error } = await supabase
         .from("stories")
         .select("*")
@@ -31,7 +54,7 @@ export default function AdminStoriesPage() {
       if (error) showToast(error.message, "error");
       setLoading(false);
     }
-    fetch();
+    fetchStories();
   }, []);
 
   async function handleDelete(id: string) {
@@ -45,6 +68,32 @@ export default function AdminStoriesPage() {
       showToast("Story deleted");
     }
     setDeleting(null);
+  }
+
+  const categoryStats: CategoryStats[] = CATEGORIES.map((cat) => {
+    const inCat = stories.filter((s) => s.category === cat);
+    return {
+      name: cat,
+      total: inCat.length,
+      published: inCat.filter((s) => s.published).length,
+      draft: inCat.filter((s) => !s.published).length,
+    };
+  });
+
+  const allTotal = stories.length;
+  const allPublished = stories.filter((s) => s.published).length;
+
+  const filtered =
+    activeCategory === "all"
+      ? stories
+      : stories.filter((s) => s.category === activeCategory);
+
+  function selectCategory(cat: string) {
+    if (cat === "all") {
+      router.push("/admin/stories", { scroll: false });
+    } else {
+      router.push(`/admin/stories?category=${cat}`, { scroll: false });
+    }
   }
 
   return (
@@ -69,20 +118,68 @@ export default function AdminStoriesPage() {
         </Link>
       </div>
 
+      {/* Category cards */}
+      {!loading && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
+          <button
+            onClick={() => selectCategory("all")}
+            className={`text-left p-4 border transition-colors ${
+              activeCategory === "all"
+                ? "border-crimson bg-crimson/5"
+                : "border-white/5 bg-charcoal hover:border-white/10"
+            }`}
+          >
+            <p className="text-sm font-semibold text-warm">All</p>
+            <p className="text-xs text-warm-dim/40 mt-1">
+              {allTotal} {allTotal === 1 ? "story" : "stories"}
+            </p>
+            <p className="text-[0.6rem] text-warm-dim/30 mt-0.5">
+              {allPublished} published, {allTotal - allPublished} draft
+            </p>
+          </button>
+          {categoryStats.map((cat) => (
+            <button
+              key={cat.name}
+              onClick={() => selectCategory(cat.name)}
+              className={`text-left p-4 border transition-colors ${
+                activeCategory === cat.name
+                  ? "border-crimson bg-crimson/5"
+                  : "border-white/5 bg-charcoal hover:border-white/10"
+              }`}
+            >
+              <p className="text-sm font-semibold text-warm capitalize">
+                {cat.name}
+              </p>
+              <p className="text-xs text-warm-dim/40 mt-1">
+                {cat.total} {cat.total === 1 ? "story" : "stories"}
+              </p>
+              <p className="text-[0.6rem] text-warm-dim/30 mt-0.5">
+                {cat.published} published, {cat.draft} draft
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Stories table */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-16 bg-charcoal animate-pulse" />
           ))}
         </div>
-      ) : stories.length === 0 ? (
-        <div className="text-center py-20 bg-charcoal border border-white/5">
-          <p className="text-warm-dim/40 mb-4">No stories yet.</p>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 bg-charcoal border border-white/5">
+          <p className="text-warm-dim/40 mb-4">
+            {activeCategory === "all"
+              ? "No stories yet."
+              : `No stories in "${activeCategory}" yet.`}
+          </p>
           <Link
             href="/admin/stories/new"
             className="text-crimson text-sm hover:underline"
           >
-            Create your first story
+            Create a story
           </Link>
         </div>
       ) : (
@@ -108,7 +205,7 @@ export default function AdminStoriesPage() {
               </tr>
             </thead>
             <tbody>
-              {stories.map((story) => (
+              {filtered.map((story) => (
                 <tr
                   key={story.id}
                   className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"

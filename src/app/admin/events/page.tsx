@@ -8,21 +8,21 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState<SiteEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "published" | "draft"
+  >("all");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
 
-  function showToast(
-    message: string,
-    type: "success" | "error" = "success"
-  ) {
+  function showToast(message: string, type: "success" | "error" = "success") {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchEvents() {
       const { data, error } = await supabase
         .from("events")
         .select("*")
@@ -31,7 +31,7 @@ export default function AdminEventsPage() {
       if (error) showToast(error.message, "error");
       setLoading(false);
     }
-    fetch();
+    fetchEvents();
   }, []);
 
   async function handleDelete(id: string) {
@@ -46,6 +46,15 @@ export default function AdminEventsPage() {
     }
     setDeleting(null);
   }
+
+  const filtered = events.filter((ev) => {
+    if (statusFilter === "published") return ev.published;
+    if (statusFilter === "draft") return !ev.published;
+    return true;
+  });
+
+  const publishedCount = events.filter((e) => e.published).length;
+  const draftCount = events.length - publishedCount;
 
   return (
     <div>
@@ -69,21 +78,55 @@ export default function AdminEventsPage() {
         </Link>
       </div>
 
+      {/* Filter bar */}
+      {!loading && events.length > 0 && (
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-xs tracking-[0.1em] uppercase text-warm-dim/40">
+            Filter:
+          </span>
+          {(
+            [
+              { key: "all", label: `All (${events.length})` },
+              { key: "published", label: `Published (${publishedCount})` },
+              { key: "draft", label: `Draft (${draftCount})` },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.key}
+              onClick={() => setStatusFilter(opt.key)}
+              className={`px-3 py-1.5 text-xs tracking-[0.1em] uppercase transition-colors ${
+                statusFilter === opt.key
+                  ? "bg-crimson text-warm"
+                  : "bg-charcoal text-warm-dim/50 border border-white/5 hover:border-white/10"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-16 bg-charcoal animate-pulse" />
           ))}
         </div>
-      ) : events.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="text-center py-20 bg-charcoal border border-white/5">
-          <p className="text-warm-dim/40 mb-4">No events yet.</p>
-          <Link
-            href="/admin/events/new"
-            className="text-crimson text-sm hover:underline"
-          >
-            Create your first event
-          </Link>
+          <p className="text-warm-dim/40 mb-4">
+            {events.length === 0
+              ? "No events yet."
+              : `No ${statusFilter} events.`}
+          </p>
+          {events.length === 0 && (
+            <Link
+              href="/admin/events/new"
+              className="text-crimson text-sm hover:underline"
+            >
+              Create your first event
+            </Link>
+          )}
         </div>
       ) : (
         <div className="bg-charcoal border border-white/5 overflow-x-auto">
@@ -108,7 +151,7 @@ export default function AdminEventsPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((ev) => (
+              {filtered.map((ev) => (
                 <tr
                   key={ev.id}
                   className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"

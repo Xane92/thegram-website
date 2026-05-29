@@ -95,6 +95,14 @@ export default function EditStoryPage() {
     setUploading(false);
   }
 
+  async function handleImageRemove() {
+    if (!form.cover_image_url) return;
+    const path = form.cover_image_url.split("/media/")[1];
+    if (path) await supabase.storage.from("media").remove([path]);
+    updateField("cover_image_url", "");
+    setImagePreview(null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -204,21 +212,33 @@ export default function EditStoryPage() {
           <label className="block text-xs tracking-[0.15em] uppercase text-warm-dim/50 mb-2">
             Cover Image
           </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="w-full bg-charcoal border border-white/10 px-4 py-3 text-sm text-warm-dim/50 file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:bg-crimson/20 file:text-crimson file:cursor-pointer"
-          />
-          {uploading && (
-            <p className="mt-2 text-xs text-warm-dim/40">Uploading...</p>
-          )}
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-3 max-h-48 object-cover border border-white/10"
-            />
+          {imagePreview || form.cover_image_url ? (
+            <div className="relative inline-block mt-1">
+              <img
+                src={imagePreview || form.cover_image_url}
+                alt="Preview"
+                className="max-h-48 object-cover border border-white/10"
+              />
+              <button
+                type="button"
+                onClick={handleImageRemove}
+                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-[0.6rem] tracking-wider uppercase px-2.5 py-1 transition-colors"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full bg-charcoal border border-white/10 px-4 py-3 text-sm text-warm-dim/50 file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:bg-crimson/20 file:text-crimson file:cursor-pointer"
+              />
+              {uploading && (
+                <p className="mt-2 text-xs text-warm-dim/40">Uploading...</p>
+              )}
+            </>
           )}
         </div>
 
