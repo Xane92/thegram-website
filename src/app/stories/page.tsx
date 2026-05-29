@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const CATEGORIES = [
   "All",
@@ -14,16 +15,11 @@ const CATEGORIES = [
   "Lifestyle",
 ];
 
+const CATEGORY_SLUGS = CATEGORIES.filter((c) => c !== "All").map((c) =>
+  c.toLowerCase()
+);
+
 const STORIES = [
-  {
-    category: "Startups",
-    headline:
-      "How a Lagos Startup Is Revolutionizing Digital Payments Across West Africa",
-    excerpt:
-      "With over 40 million transactions processed in its first year, this fintech company is proving that African-built solutions can compete on the world stage.",
-    author: "Amara Osei",
-    date: "May 22, 2026",
-  },
   {
     category: "Music",
     headline:
@@ -32,6 +28,15 @@ const STORIES = [
       "How a generation of artists turned a regional genre into the most streamed sound on the planet — and why the best is still ahead.",
     author: "Kofi Mensah",
     date: "May 18, 2026",
+  },
+  {
+    category: "Culture",
+    headline:
+      "The Festival Revolution: How Cultural Events Are Reshaping African Tourism",
+    excerpt:
+      "From Afrochella to Lake of Stars, a network of festivals is drawing the diaspora home and rewriting the continent's tourism playbook.",
+    author: "Nia Adjei",
+    date: "May 2, 2026",
   },
   {
     category: "Film",
@@ -60,23 +65,79 @@ const STORIES = [
     date: "May 6, 2026",
   },
   {
-    category: "Culture",
+    category: "Policies",
     headline:
-      "The Festival Revolution: How Cultural Events Are Reshaping African Tourism",
+      "The AfCFTA Effect: How Free Trade Is Redrawing Africa's Economic Map",
     excerpt:
-      "From Afrochella to Lake of Stars, a network of festivals is drawing the diaspora home and rewriting the continent's tourism playbook.",
-    author: "Nia Adjei",
-    date: "May 2, 2026",
+      "The African Continental Free Trade Area is the largest free trade zone by number of countries — and it's just getting started.",
+    author: "Kwame Asante",
+    date: "Apr 28, 2026",
+  },
+  {
+    category: "Startups",
+    headline:
+      "How a Lagos Startup Is Revolutionizing Digital Payments Across West Africa",
+    excerpt:
+      "With over 40 million transactions processed in its first year, this fintech company is proving that African-built solutions can compete on the world stage.",
+    author: "Amara Osei",
+    date: "May 22, 2026",
+  },
+  {
+    category: "Lifestyle",
+    headline:
+      "The New African Traveler: Exploring the Continent on Its Own Terms",
+    excerpt:
+      "A growing wave of intra-African tourism is redefining travel — from luxury safaris in Rwanda to surf culture in Dakar.",
+    author: "Zuri Mwangi",
+    date: "Apr 20, 2026",
+  },
+  {
+    category: "Music",
+    headline:
+      "Amapiano's Next Chapter: The Producers Pushing the Sound Forward",
+    excerpt:
+      "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.",
+    author: "Thabo Dlamini",
+    date: "Apr 15, 2026",
   },
 ];
 
-export default function StoriesPage() {
-  const [active, setActive] = useState("All");
+function resolveCategory(param: string | null): string {
+  if (!param) return "All";
+  const match = CATEGORIES.find((c) => c.toLowerCase() === param.toLowerCase());
+  return match ?? "All";
+}
+
+function StoriesContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const categoryParam = searchParams.get("category");
+  const [active, setActive] = useState(() => resolveCategory(categoryParam));
+
+  useEffect(() => {
+    setActive(resolveCategory(categoryParam));
+  }, [categoryParam]);
 
   const filtered =
     active === "All"
       ? STORIES
       : STORIES.filter((s) => s.category === active);
+
+  const selectCategory = useCallback(
+    (cat: string) => {
+      setActive(cat);
+      if (cat === "All") {
+        router.push(pathname, { scroll: false });
+      } else {
+        router.push(`${pathname}?category=${cat.toLowerCase()}`, {
+          scroll: false,
+        });
+      }
+    },
+    [router, pathname]
+  );
 
   return (
     <>
@@ -105,7 +166,7 @@ export default function StoriesPage() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActive(cat)}
+                onClick={() => selectCategory(cat)}
                 className={`px-4 py-2 text-[0.7rem] tracking-[0.15em] uppercase transition-all duration-300 shrink-0 ${
                   active === cat
                     ? "bg-crimson text-warm"
@@ -172,5 +233,13 @@ export default function StoriesPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function StoriesPage() {
+  return (
+    <Suspense>
+      <StoriesContent />
+    </Suspense>
   );
 }

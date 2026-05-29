@@ -5,13 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const NAV_LINKS = [
+  { label: "Home", href: "/", match: "/" },
   { label: "Stories", href: "/stories", match: "/stories" },
-  { label: "Culture", href: "/stories" },
-  { label: "Music", href: "/stories" },
-  { label: "Film", href: "/stories" },
-  { label: "Fashion", href: "/stories" },
   { label: "Events", href: "/events", match: "/events" },
-  { label: "Business", href: "/stories" },
   { label: "About", href: "/about", match: "/about" },
 ];
 
@@ -53,7 +49,10 @@ export default function Navbar() {
 
         <div className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) => {
-            const isActive = link.match && pathname === link.match;
+            const isActive =
+              link.match === "/"
+                ? pathname === "/"
+                : pathname.startsWith(link.match);
             return (
               <Link
                 key={link.label}
@@ -103,7 +102,10 @@ export default function Navbar() {
       >
         <div className="bg-navy/95 backdrop-blur-xl px-6 pb-8 pt-4 flex flex-col gap-5">
           {NAV_LINKS.map((link) => {
-            const isActive = link.match && pathname === link.match;
+            const isActive =
+              link.match === "/"
+                ? pathname === "/"
+                : pathname.startsWith(link.match);
             return (
               <Link
                 key={link.label}

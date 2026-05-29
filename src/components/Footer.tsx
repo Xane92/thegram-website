@@ -1,15 +1,21 @@
 import Link from "next/link";
 
-const FOOTER_LINKS = [
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
   { label: "Stories", href: "/stories" },
-  { label: "Culture", href: "/stories" },
-  { label: "Music", href: "/stories" },
-  { label: "Film", href: "/stories" },
-  { label: "Fashion", href: "/stories" },
   { label: "Events", href: "/events" },
-  { label: "Business", href: "/stories" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/about" },
+];
+
+const CATEGORY_LINKS = [
+  { label: "Music", href: "/stories?category=music" },
+  { label: "Culture", href: "/stories?category=culture" },
+  { label: "Film", href: "/stories?category=film" },
+  { label: "Fashion", href: "/stories?category=fashion" },
+  { label: "Finance", href: "/stories?category=finance" },
+  { label: "Policies", href: "/stories?category=policies" },
+  { label: "Startups", href: "/stories?category=startups" },
+  { label: "Lifestyle", href: "/stories?category=lifestyle" },
 ];
 
 const SOCIALS = ["Instagram", "TikTok", "X / Twitter", "Facebook", "LinkedIn"];
@@ -42,7 +48,25 @@ export default function Footer() {
               Navigate
             </p>
             <ul className="space-y-3">
-              {FOOTER_LINKS.map((link) => (
+              {NAV_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-warm-dim/50 hover:text-warm transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="text-[0.65rem] tracking-[0.3em] uppercase text-crimson mb-6">
+              Categories
+            </p>
+            <ul className="space-y-3">
+              {CATEGORY_LINKS.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -71,14 +95,6 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div className="flex flex-col items-start lg:items-end justify-between">
-            <div className="text-warm-dim/10 text-6xl font-serif font-bold leading-none select-none">
-              +&nbsp;x
-              <br />
-              x&nbsp;+
-            </div>
           </div>
         </div>
 

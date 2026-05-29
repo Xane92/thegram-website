@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 /* ------------------------------------------------------------------ */
 /*  HERO                                                               */
 /* ------------------------------------------------------------------ */
@@ -40,15 +42,15 @@ function Hero() {
 /*  CONTENT PILLARS                                                    */
 /* ------------------------------------------------------------------ */
 const PILLARS = [
-  { name: "Music", desc: "From Afrobeats to Amapiano—the sounds shaping the continent and the world." },
-  { name: "Culture", desc: "Traditions, movements, and the identities that define us." },
-  { name: "Film", desc: "Nollywood, documentaries, and the rise of African cinema." },
-  { name: "Fashion", desc: "Designers, street style, and the aesthetics of modern Africa." },
-  { name: "Events", desc: "Live experiences, festivals, and gatherings that move the culture." },
-  { name: "Finance", desc: "Building wealth, fintech, and economic futures." },
-  { name: "Policies", desc: "The decisions shaping Africa’s trajectory on the global stage." },
-  { name: "Startups", desc: "Founders, ideas, and the companies rewriting the playbook." },
-  { name: "Lifestyle", desc: "Travel, food, wellness—how we live and celebrate." },
+  { name: "Music", desc: "From Afrobeats to Amapiano—the sounds shaping the continent and the world.", href: "/stories?category=music" },
+  { name: "Culture", desc: "Traditions, movements, and the identities that define us.", href: "/stories?category=culture" },
+  { name: "Film", desc: "Nollywood, documentaries, and the rise of African cinema.", href: "/stories?category=film" },
+  { name: "Fashion", desc: "Designers, street style, and the aesthetics of modern Africa.", href: "/stories?category=fashion" },
+  { name: "Events", desc: "Live experiences, festivals, and gatherings that move the culture.", href: "/events" },
+  { name: "Finance", desc: "Building wealth, fintech, and economic futures.", href: "/stories?category=finance" },
+  { name: "Policies", desc: "The decisions shaping Africa’s trajectory on the global stage.", href: "/stories?category=policies" },
+  { name: "Startups", desc: "Founders, ideas, and the companies rewriting the playbook.", href: "/stories?category=startups" },
+  { name: "Lifestyle", desc: "Travel, food, wellness—how we live and celebrate.", href: "/stories?category=lifestyle" },
 ];
 
 function Pillars() {
@@ -68,9 +70,10 @@ function Pillars() {
           {PILLARS.map((p, i) => {
             const isLarge = i === 0 || i === 3 || i === 7;
             return (
-              <div
+              <Link
                 key={p.name}
-                className={`pillar-item group relative bg-charcoal p-8 sm:p-10 transition-colors duration-300 hover:bg-navy cursor-pointer ${
+                href={p.href}
+                className={`pillar-item group relative bg-charcoal p-8 sm:p-10 transition-colors duration-300 hover:bg-navy ${
                   isLarge ? "col-span-2 row-span-1 sm:col-span-2" : "col-span-1"
                 } fade-in`}
               >
@@ -83,7 +86,7 @@ function Pillars() {
                 <span className="absolute top-6 right-6 text-[0.6rem] text-warm-dim/20 group-hover:text-crimson/60 transition-colors">
                   +
                 </span>
-              </div>
+              </Link>
             );
           })}
         </div>
