@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase, type SiteEvent } from "@/lib/supabase";
 
 const FALLBACK_EVENTS = [
   {
+    id: null,
     date: "Jul 18",
     year: "2026",
     name: "AfroNation Lagos 2026",
@@ -12,6 +14,7 @@ const FALLBACK_EVENTS = [
     desc: "The biggest Afrobeats festival returns with three stages, 40+ artists, and a weekend of non-stop energy on the Atlantic coastline.",
   },
   {
+    id: null,
     date: "Aug 22",
     year: "2026",
     name: "Lagos Fashion Week",
@@ -19,6 +22,7 @@ const FALLBACK_EVENTS = [
     desc: "Africa's premier fashion event showcasing 30 emerging and established designers pushing the boundaries of contemporary African design.",
   },
   {
+    id: null,
     date: "Sep 12",
     year: "2026",
     name: "Nollywood Film Premiere Night",
@@ -26,6 +30,7 @@ const FALLBACK_EVENTS = [
     desc: "An exclusive screening and red-carpet premiere celebrating the latest wave of Nollywood cinema with the filmmakers behind the lens.",
   },
   {
+    id: null,
     date: "Oct 04",
     year: "2026",
     name: "Diaspora Connect Summit",
@@ -35,6 +40,7 @@ const FALLBACK_EVENTS = [
 ];
 
 type DisplayEvent = {
+  id: string | null;
   date: string;
   year: string;
   name: string;
@@ -76,7 +82,7 @@ export default function EventsPage() {
     async function fetchEvents() {
       const { data } = await supabase
         .from("events")
-        .select("name, date, location, description, ticket_link")
+        .select("id, name, date, location, description, ticket_link")
         .eq("published", true)
         .gte("date", new Date().toISOString())
         .order("date", { ascending: true });
@@ -86,6 +92,7 @@ export default function EventsPage() {
           data.map((e) => {
             const d = new Date(e.date);
             return {
+              id: e.id,
               date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
               year: d.getFullYear().toString(),
               name: e.name,
@@ -133,9 +140,10 @@ export default function EventsPage() {
 
           <div className="grid gap-[1px] bg-white/5 md:grid-cols-2">
             {events.map((ev) => (
-              <article
+              <Link
                 key={ev.name}
-                className="group bg-navy hover:bg-charcoal transition-colors duration-300 p-8 sm:p-10 fade-in"
+                href={ev.id ? `/events/${ev.id}` : "#tickets"}
+                className="group bg-navy hover:bg-charcoal transition-colors duration-300 p-8 sm:p-10 fade-in block"
               >
                 <div className="flex items-start gap-6">
                   <div className="shrink-0 w-20 h-20 bg-crimson/10 border border-crimson/20 flex flex-col items-center justify-center">
@@ -157,15 +165,12 @@ export default function EventsPage() {
                     <p className="mt-3 text-sm leading-relaxed text-warm-dim/50">
                       {ev.desc}
                     </p>
-                    <a
-                      href="#tickets"
-                      className="cta-glow mt-6 inline-block border border-crimson/40 px-6 py-3 text-[0.7rem] tracking-[0.2em] uppercase text-crimson hover:bg-crimson hover:text-warm transition-all duration-300"
-                    >
-                      Get Tickets
-                    </a>
+                    <span className="cta-glow mt-6 inline-block border border-crimson/40 px-6 py-3 text-[0.7rem] tracking-[0.2em] uppercase text-crimson group-hover:bg-crimson group-hover:text-warm transition-all duration-300">
+                      View Event
+                    </span>
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>

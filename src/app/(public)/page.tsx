@@ -102,18 +102,21 @@ function Pillars() {
 /* ------------------------------------------------------------------ */
 const FALLBACK_STORIES = [
   {
+    id: null as string | null,
     category: "Music",
     headline: "The New Wave: How Amapiano Conquered Global Playlists",
     excerpt: "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.",
     cover_image: null as string | null,
   },
   {
+    id: null as string | null,
     category: "Film",
     headline: "Nollywood's Next Chapter Isn't What You Think",
     excerpt: "A new class of filmmakers are redefining narrative on their own terms.",
     cover_image: null as string | null,
   },
   {
+    id: null as string | null,
     category: "Startups",
     headline: "Building in Lagos: The Founders Rewriting the Playbook",
     excerpt: "Inside the ecosystem producing Africa's most ambitious tech companies.",
@@ -128,7 +131,7 @@ function Featured() {
     async function fetchFeatured() {
       const { data } = await supabase
         .from("stories")
-        .select("title, excerpt, category, cover_image")
+        .select("id, title, excerpt, category, cover_image")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(3);
@@ -136,6 +139,7 @@ function Featured() {
       if (data && data.length > 0) {
         setStories(
           data.map((s) => ({
+            id: s.id,
             category: (s.category ?? "").charAt(0).toUpperCase() + (s.category ?? "").slice(1),
             headline: s.title,
             excerpt: s.excerpt ?? "",
@@ -160,7 +164,10 @@ function Featured() {
         </div>
 
         <div className="grid gap-[1px] bg-white/5 lg:grid-cols-2">
-          <div className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in">
+          <Link
+            href={stories[0]?.id ? `/stories/${stories[0].id}` : "/stories"}
+            className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in"
+          >
             {stories[0]?.cover_image ? (
               <img src={stories[0].cover_image} alt={stories[0].headline} className="aspect-[4/3] w-full object-cover" />
             ) : (
@@ -176,16 +183,17 @@ function Featured() {
               <p className="mt-4 text-sm leading-relaxed text-warm-dim/60 max-w-md">
                 {stories[0]?.excerpt}
               </p>
-              <span className="mt-6 inline-block text-[0.75rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors cursor-pointer">
+              <span className="mt-6 inline-block text-[0.75rem] tracking-[0.2em] uppercase text-crimson group-hover:text-warm transition-colors">
                 Read More &rarr;
               </span>
             </div>
-          </div>
+          </Link>
 
           <div className="grid gap-[1px] bg-white/5">
             {stories.slice(1).map((s) => (
-              <div
+              <Link
                 key={s.headline}
+                href={s.id ? `/stories/${s.id}` : "/stories"}
                 className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in"
               >
                 <div className="flex flex-col sm:flex-row">
@@ -204,12 +212,12 @@ function Featured() {
                     <p className="mt-3 text-sm leading-relaxed text-warm-dim/60">
                       {s.excerpt}
                     </p>
-                    <span className="mt-4 inline-block text-[0.7rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors cursor-pointer">
+                    <span className="mt-4 inline-block text-[0.7rem] tracking-[0.2em] uppercase text-crimson group-hover:text-warm transition-colors">
                       Read More &rarr;
                     </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -222,9 +230,9 @@ function Featured() {
 /*  EVENTS / TICKETING                                                 */
 /* ------------------------------------------------------------------ */
 const FALLBACK_EVENTS = [
-  { date: "Jul 18, 2026", name: "Afro Culture Fest", location: "Lagos, Nigeria" },
-  { date: "Aug 09, 2026", name: "TheGram Live: Sound & Vision", location: "Accra, Ghana" },
-  { date: "Sep 27, 2026", name: "Diaspora Connect Summit", location: "London, UK" },
+  { id: null as string | null, date: "Jul 18, 2026", name: "Afro Culture Fest", location: "Lagos, Nigeria" },
+  { id: null as string | null, date: "Aug 09, 2026", name: "TheGram Live: Sound & Vision", location: "Accra, Ghana" },
+  { id: null as string | null, date: "Sep 27, 2026", name: "Diaspora Connect Summit", location: "London, UK" },
 ];
 
 function HomeEvents() {
@@ -234,7 +242,7 @@ function HomeEvents() {
     async function fetchEvents() {
       const { data } = await supabase
         .from("events")
-        .select("name, date, location")
+        .select("id, name, date, location")
         .eq("published", true)
         .gte("date", new Date().toISOString())
         .order("date", { ascending: true })
@@ -243,6 +251,7 @@ function HomeEvents() {
       if (data && data.length > 0) {
         setEvents(
           data.map((e) => ({
+            id: e.id,
             date: new Date(e.date).toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
@@ -274,9 +283,10 @@ function HomeEvents() {
 
         <div className="grid gap-[1px] bg-white/5 sm:grid-cols-3">
           {events.map((ev) => (
-            <div
+            <Link
               key={ev.name}
-              className="group bg-charcoal hover:bg-navy p-8 sm:p-10 transition-colors duration-300 fade-in"
+              href={ev.id ? `/events/${ev.id}` : "/events"}
+              className="group bg-charcoal hover:bg-navy p-8 sm:p-10 transition-colors duration-300 fade-in block"
             >
               <p className="text-[0.65rem] tracking-[0.3em] uppercase text-crimson/70 mb-4">
                 {ev.date}
@@ -285,13 +295,10 @@ function HomeEvents() {
                 {ev.name}
               </h3>
               <p className="mt-2 text-sm text-warm-dim/50">{ev.location}</p>
-              <a
-                href="/events#tickets"
-                className="cta-glow mt-8 inline-block border border-crimson/40 px-6 py-3 text-[0.7rem] tracking-[0.2em] uppercase text-crimson hover:bg-crimson hover:text-warm transition-all duration-300"
-              >
-                Get Tickets
-              </a>
-            </div>
+              <span className="cta-glow mt-8 inline-block border border-crimson/40 px-6 py-3 text-[0.7rem] tracking-[0.2em] uppercase text-crimson group-hover:bg-crimson group-hover:text-warm transition-all duration-300">
+                View Event
+              </span>
+            </Link>
           ))}
         </div>
 
