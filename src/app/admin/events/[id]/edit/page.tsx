@@ -12,6 +12,7 @@ export default function EditEventPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -198,7 +199,7 @@ export default function EditEventPage() {
               />
               <button
                 type="button"
-                onClick={handleImageRemove}
+                onClick={() => setShowRemoveModal(true)}
                 className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-[0.6rem] tracking-wider uppercase px-2.5 py-1 transition-colors"
               >
                 Remove
@@ -267,6 +268,33 @@ export default function EditEventPage() {
           </button>
         </div>
       </form>
+
+      {showRemoveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-charcoal border border-white/10 p-6 max-w-sm w-full mx-4">
+            <p className="text-sm text-warm mb-6">
+              Are you sure you want to remove this image?
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowRemoveModal(false)}
+                className="px-5 py-2 text-xs tracking-[0.1em] uppercase text-warm-dim/50 border border-white/10 hover:border-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleImageRemove();
+                  setShowRemoveModal(false);
+                }}
+                className="px-5 py-2 text-xs tracking-[0.1em] uppercase bg-red-600 hover:bg-red-700 text-white transition-colors"
+              >
+                Yes, Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

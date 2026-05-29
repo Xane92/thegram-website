@@ -49,32 +49,6 @@ type DisplayEvent = {
   ticket_link?: string;
 };
 
-function TicketEmbed() {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <div className="relative fade-in">
-      {!loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-navy rounded-lg z-10">
-          <div className="text-center">
-            <div className="inline-block w-6 h-6 border-2 border-crimson/30 border-t-crimson rounded-full animate-spin mb-4" />
-            <p className="text-sm tracking-[0.2em] uppercase text-crimson">
-              Loading tickets...
-            </p>
-          </div>
-        </div>
-      )}
-      <iframe
-        src="https://gramtickets.com"
-        title="TheGram Tickets"
-        onLoad={() => setLoaded(true)}
-        className="w-full min-h-[400px] sm:min-h-[600px] rounded-lg border border-charcoal bg-navy"
-        allow="payment"
-      />
-    </div>
-  );
-}
-
 export default function EventsPage() {
   const [events, setEvents] = useState<DisplayEvent[]>(FALLBACK_EVENTS);
 
@@ -142,7 +116,7 @@ export default function EventsPage() {
             {events.map((ev) => (
               <Link
                 key={ev.name}
-                href={ev.id ? `/events/${ev.id}` : "#tickets"}
+                href={ev.id ? `/events/${ev.id}` : "/events"}
                 className="group bg-navy hover:bg-charcoal transition-colors duration-300 p-8 sm:p-10 fade-in block"
               >
                 <div className="flex items-start gap-6">
@@ -176,25 +150,6 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Tickets & Booking */}
-      <section id="tickets" className="bg-charcoal py-20 sm:py-28 plus-field">
-        <div className="mx-auto max-w-4xl px-6 lg:px-10">
-          <div className="text-center mb-12 fade-in">
-            <p className="text-[0.65rem] tracking-[0.5em] uppercase text-crimson mb-3">
-              + &nbsp; Booking &nbsp; +
-            </p>
-            <h2 className="font-serif text-3xl font-bold sm:text-4xl text-warm">
-              Tickets &amp; Booking
-            </h2>
-            <p className="mt-4 text-base text-warm-dim/50 max-w-md mx-auto">
-              Powered by our ticketing partner. Select an event above to secure
-              your spot.
-            </p>
-          </div>
-
-          <TicketEmbed />
-        </div>
-      </section>
     </>
   );
 }
