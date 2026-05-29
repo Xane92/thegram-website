@@ -3,7 +3,7 @@ import Link from "next/link";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Stories", href: "/stories" },
-  { label: "Events", href: "/events" },
+  { label: "Events", href: "https://gramtickets.com", external: true },
   { label: "About", href: "/about" },
 ];
 
@@ -50,12 +50,23 @@ export default function Footer() {
             <ul className="space-y-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-warm-dim/50 hover:text-warm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-warm-dim/50 hover:text-warm transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-warm-dim/50 hover:text-warm transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

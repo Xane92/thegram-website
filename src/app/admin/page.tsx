@@ -32,31 +32,22 @@ export default function AdminDashboard() {
     stories: 0,
     storiesPublished: 0,
     storiesDraft: 0,
-    events: 0,
-    eventsPublished: 0,
-    eventsDraft: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchCounts() {
-      const [storiesRes, eventsRes] = await Promise.all([
-        supabase.from("stories").select("id, published"),
-        supabase.from("events").select("id, published"),
-      ]);
+      const { data } = await supabase
+        .from("stories")
+        .select("id, published");
 
-      const stories = storiesRes.data ?? [];
-      const events = eventsRes.data ?? [];
+      const stories = data ?? [];
       const sp = stories.filter((s) => s.published).length;
-      const ep = events.filter((e) => e.published).length;
 
       setStats({
         stories: stories.length,
         storiesPublished: sp,
         storiesDraft: stories.length - sp,
-        events: events.length,
-        eventsPublished: ep,
-        eventsDraft: events.length - ep,
       });
       setLoading(false);
     }
@@ -69,53 +60,35 @@ export default function AdminDashboard() {
         Dashboard
       </h1>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+      <div className="grid gap-4 sm:grid-cols-3 mb-10">
         <StatCard
           label="Total Stories"
           value={stats.stories}
           loading={loading}
         />
         <StatCard
-          label="Published Stories"
+          label="Published"
           value={stats.storiesPublished}
           loading={loading}
         />
         <StatCard
-          label="Total Events"
-          value={stats.events}
-          loading={loading}
-        />
-        <StatCard
-          label="Published Events"
-          value={stats.eventsPublished}
+          label="Drafts"
+          value={stats.storiesDraft}
           loading={loading}
         />
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Link
-          href="/admin/stories"
-          className="group block bg-charcoal border border-white/5 p-8 hover:border-crimson/30 transition-colors"
-        >
-          <h2 className="font-serif text-xl font-bold text-warm group-hover:text-crimson transition-colors">
-            Manage Stories
-          </h2>
-          <p className="mt-2 text-sm text-warm-dim/50">
-            Create, edit, and publish stories.
-          </p>
-        </Link>
-        <Link
-          href="/admin/events"
-          className="group block bg-charcoal border border-white/5 p-8 hover:border-crimson/30 transition-colors"
-        >
-          <h2 className="font-serif text-xl font-bold text-warm group-hover:text-crimson transition-colors">
-            Manage Events
-          </h2>
-          <p className="mt-2 text-sm text-warm-dim/50">
-            Create, edit, and publish events.
-          </p>
-        </Link>
-      </div>
+      <Link
+        href="/admin/stories"
+        className="group block bg-charcoal border border-white/5 p-8 hover:border-crimson/30 transition-colors max-w-md"
+      >
+        <h2 className="font-serif text-xl font-bold text-warm group-hover:text-crimson transition-colors">
+          Manage Stories
+        </h2>
+        <p className="mt-2 text-sm text-warm-dim/50">
+          Create, edit, and publish stories.
+        </p>
+      </Link>
     </div>
   );
 }

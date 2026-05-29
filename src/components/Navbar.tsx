@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const NAV_LINKS = [
   { label: "Home", href: "/", match: "/" },
   { label: "Stories", href: "/stories", match: "/stories" },
-  { label: "Events", href: "/events", match: "/events" },
+  { label: "Events", href: "https://gramtickets.com", match: "", external: true },
   { label: "About", href: "/about", match: "/about" },
 ];
 
@@ -49,6 +49,19 @@ export default function Navbar() {
 
         <div className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) => {
+            if (link.external) {
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-link relative text-[0.8rem] tracking-[0.15em] uppercase transition-colors text-warm-dim/80 hover:text-warm"
+                >
+                  {link.label}
+                </a>
+              );
+            }
             const isActive =
               link.match === "/"
                 ? pathname === "/"
@@ -102,6 +115,19 @@ export default function Navbar() {
       >
         <div className="bg-navy/95 backdrop-blur-xl px-6 pb-8 pt-4 flex flex-col gap-5">
           {NAV_LINKS.map((link) => {
+            if (link.external) {
+              return (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm tracking-[0.2em] uppercase transition-colors text-warm-dim/80 hover:text-crimson"
+                >
+                  {link.label}
+                </a>
+              );
+            }
             const isActive =
               link.match === "/"
                 ? pathname === "/"

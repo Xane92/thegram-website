@@ -227,89 +227,29 @@ function Featured() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  EVENTS / TICKETING                                                 */
+/*  EVENTS CTA                                                         */
 /* ------------------------------------------------------------------ */
-const FALLBACK_EVENTS = [
-  { id: null as string | null, date: "Jul 18, 2026", name: "Afro Culture Fest", location: "Lagos, Nigeria" },
-  { id: null as string | null, date: "Aug 09, 2026", name: "TheGram Live: Sound & Vision", location: "Accra, Ghana" },
-  { id: null as string | null, date: "Sep 27, 2026", name: "Diaspora Connect Summit", location: "London, UK" },
-];
-
 function HomeEvents() {
-  const [events, setEvents] = useState(FALLBACK_EVENTS);
-
-  useEffect(() => {
-    async function fetchEvents() {
-      const { data } = await supabase
-        .from("events")
-        .select("id, name, date, location")
-        .eq("published", true)
-        .gte("date", new Date().toISOString())
-        .order("date", { ascending: true })
-        .limit(3);
-
-      if (data && data.length > 0) {
-        setEvents(
-          data.map((e) => ({
-            id: e.id,
-            date: new Date(e.date).toLocaleDateString("en-US", {
-              month: "short",
-              day: "2-digit",
-              year: "numeric",
-            }),
-            name: e.name,
-            location: e.location,
-          }))
-        );
-      }
-    }
-    fetchEvents();
-  }, []);
-
   return (
     <section id="events" className="relative bg-charcoal py-28 sm:py-36 plus-field">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="mb-16 fade-in">
-          <p className="text-[0.65rem] tracking-[0.5em] uppercase text-crimson mb-3">
-            x &nbsp; Live &nbsp; x
-          </p>
-          <h2 className="font-serif text-4xl font-bold sm:text-5xl text-warm">
-            Upcoming Events
-          </h2>
-          <p className="mt-4 text-base text-warm-dim/60 max-w-lg">
-            Experience culture live. Get your tickets.
-          </p>
-        </div>
-
-        <div className="grid gap-[1px] bg-white/5 sm:grid-cols-3">
-          {events.map((ev) => (
-            <Link
-              key={ev.name}
-              href={ev.id ? `/events/${ev.id}` : "/events"}
-              className="group bg-charcoal hover:bg-navy p-8 sm:p-10 transition-colors duration-300 fade-in block"
-            >
-              <p className="text-[0.65rem] tracking-[0.3em] uppercase text-crimson/70 mb-4">
-                {ev.date}
-              </p>
-              <h3 className="font-serif text-xl sm:text-2xl font-bold text-warm leading-tight group-hover:text-crimson transition-colors duration-300">
-                {ev.name}
-              </h3>
-              <p className="mt-2 text-sm text-warm-dim/50">{ev.location}</p>
-              <span className="cta-glow mt-8 inline-block border border-crimson/40 px-6 py-3 text-[0.7rem] tracking-[0.2em] uppercase text-crimson group-hover:bg-crimson group-hover:text-warm transition-all duration-300">
-                View Event
-              </span>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-16 text-center fade-in">
-          <a
-            href="/events"
-            className="cta-glow inline-block bg-crimson px-12 py-4 text-[0.8rem] font-semibold tracking-[0.25em] uppercase text-warm hover:bg-darkred transition-colors"
-          >
-            View All Events
-          </a>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 lg:px-10 text-center fade-in">
+        <p className="text-[0.65rem] tracking-[0.5em] uppercase text-crimson mb-3">
+          x &nbsp; Live &nbsp; x
+        </p>
+        <h2 className="font-serif text-4xl font-bold sm:text-5xl text-warm">
+          Upcoming Events
+        </h2>
+        <p className="mx-auto mt-6 max-w-lg text-base text-warm-dim/60">
+          Concerts, premieres, launches, and gatherings across the continent.
+        </p>
+        <a
+          href="https://gramtickets.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cta-glow mt-12 inline-block bg-crimson px-12 py-4 text-[0.8rem] font-semibold tracking-[0.25em] uppercase text-warm hover:bg-darkred transition-colors"
+        >
+          View Events &amp; Get Tickets
+        </a>
       </div>
     </section>
   );

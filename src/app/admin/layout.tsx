@@ -9,7 +9,6 @@ import type { User } from "@supabase/supabase-js";
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin" },
   { label: "Stories", href: "/admin/stories" },
-  { label: "Events", href: "/admin/events" },
 ];
 
 export default function AdminLayout({
