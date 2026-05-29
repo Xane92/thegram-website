@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase, type SiteEvent } from "@/lib/supabase";
 
-const EVENTS = [
+const FALLBACK_EVENTS = [
   {
     date: "Jul 18",
     year: "2026",
@@ -33,6 +34,15 @@ const EVENTS = [
   },
 ];
 
+type DisplayEvent = {
+  date: string;
+  year: string;
+  name: string;
+  location: string;
+  desc: string;
+  ticket_link?: string;
+};
+
 function TicketEmbed() {
   const [loaded, setLoaded] = useState(false);
 
@@ -60,6 +70,36 @@ function TicketEmbed() {
 }
 
 export default function EventsPage() {
+  const [events, setEvents] = useState<DisplayEvent[]>(FALLBACK_EVENTS);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      const { data } = await supabase
+        .from("events")
+        .select("name, date, location, description, ticket_link")
+        .eq("published", true)
+        .gte("date", new Date().toISOString())
+        .order("date", { ascending: true });
+
+      if (data && data.length > 0) {
+        setEvents(
+          data.map((e) => {
+            const d = new Date(e.date);
+            return {
+              date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
+              year: d.getFullYear().toString(),
+              name: e.name,
+              location: e.location,
+              desc: e.description ?? "",
+              ticket_link: e.ticket_link,
+            };
+          })
+        );
+      }
+    }
+    fetchEvents();
+  }, []);
+
   return (
     <>
       {/* Hero */}
@@ -92,7 +132,7 @@ export default function EventsPage() {
           </div>
 
           <div className="grid gap-[1px] bg-white/5 md:grid-cols-2">
-            {EVENTS.map((ev) => (
+            {events.map((ev) => (
               <article
                 key={ev.name}
                 className="group bg-navy hover:bg-charcoal transition-colors duration-300 p-8 sm:p-10 fade-in"

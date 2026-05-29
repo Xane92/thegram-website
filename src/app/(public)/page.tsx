@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 /* ------------------------------------------------------------------ */
 /*  HERO                                                               */
@@ -48,7 +50,7 @@ const PILLARS = [
   { name: "Fashion", desc: "Designers, street style, and the aesthetics of modern Africa.", href: "/stories?category=fashion" },
   { name: "Events", desc: "Live experiences, festivals, and gatherings that move the culture.", href: "/events" },
   { name: "Finance", desc: "Building wealth, fintech, and economic futures.", href: "/stories?category=finance" },
-  { name: "Policies", desc: "The decisions shaping Africa’s trajectory on the global stage.", href: "/stories?category=policies" },
+  { name: "Policies", desc: "The decisions shaping Africa's trajectory on the global stage.", href: "/stories?category=policies" },
   { name: "Startups", desc: "Founders, ideas, and the companies rewriting the playbook.", href: "/stories?category=startups" },
   { name: "Lifestyle", desc: "Travel, food, wellness—how we live and celebrate.", href: "/stories?category=lifestyle" },
 ];
@@ -98,28 +100,53 @@ function Pillars() {
 /* ------------------------------------------------------------------ */
 /*  FEATURED STORIES                                                   */
 /* ------------------------------------------------------------------ */
-const STORIES = [
+const FALLBACK_STORIES = [
   {
     category: "Music",
     headline: "The New Wave: How Amapiano Conquered Global Playlists",
-    excerpt:
-      "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.",
+    excerpt: "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.",
+    cover_image: null as string | null,
   },
   {
     category: "Film",
-    headline: "Nollywood’s Next Chapter Isn’t What You Think",
-    excerpt:
-      "A new class of filmmakers are redefining narrative on their own terms.",
+    headline: "Nollywood's Next Chapter Isn't What You Think",
+    excerpt: "A new class of filmmakers are redefining narrative on their own terms.",
+    cover_image: null as string | null,
   },
   {
     category: "Startups",
     headline: "Building in Lagos: The Founders Rewriting the Playbook",
-    excerpt:
-      "Inside the ecosystem producing Africa’s most ambitious tech companies.",
+    excerpt: "Inside the ecosystem producing Africa's most ambitious tech companies.",
+    cover_image: null as string | null,
   },
 ];
 
 function Featured() {
+  const [stories, setStories] = useState(FALLBACK_STORIES);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      const { data } = await supabase
+        .from("stories")
+        .select("title, excerpt, category, cover_image")
+        .eq("published", true)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (data && data.length > 0) {
+        setStories(
+          data.map((s) => ({
+            category: (s.category ?? "").charAt(0).toUpperCase() + (s.category ?? "").slice(1),
+            headline: s.title,
+            excerpt: s.excerpt ?? "",
+            cover_image: s.cover_image,
+          }))
+        );
+      }
+    }
+    fetchFeatured();
+  }, []);
+
   return (
     <section id="featured" className="relative bg-navy py-28 sm:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -134,34 +161,39 @@ function Featured() {
 
         <div className="grid gap-[1px] bg-white/5 lg:grid-cols-2">
           <div className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in">
-            <div className="story-placeholder aspect-[4/3] w-full" />
+            {stories[0]?.cover_image ? (
+              <img src={stories[0].cover_image} alt={stories[0].headline} className="aspect-[4/3] w-full object-cover" />
+            ) : (
+              <div className="story-placeholder aspect-[4/3] w-full" />
+            )}
             <div className="p-8 sm:p-10">
               <span className="inline-block mb-4 text-[0.65rem] tracking-[0.3em] uppercase text-crimson border border-crimson/30 px-3 py-1">
-                {STORIES[0].category}
+                {stories[0]?.category}
               </span>
               <h3 className="font-serif text-2xl sm:text-3xl font-bold text-warm leading-tight group-hover:text-crimson transition-colors duration-300">
-                {STORIES[0].headline}
+                {stories[0]?.headline}
               </h3>
               <p className="mt-4 text-sm leading-relaxed text-warm-dim/60 max-w-md">
-                {STORIES[0].excerpt}
+                {stories[0]?.excerpt}
               </p>
-              <a
-                href="#"
-                className="mt-6 inline-block text-[0.75rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors"
-              >
+              <span className="mt-6 inline-block text-[0.75rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors cursor-pointer">
                 Read More &rarr;
-              </a>
+              </span>
             </div>
           </div>
 
           <div className="grid gap-[1px] bg-white/5">
-            {STORIES.slice(1).map((s) => (
+            {stories.slice(1).map((s) => (
               <div
                 key={s.headline}
                 className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in"
               >
                 <div className="flex flex-col sm:flex-row">
-                  <div className="story-placeholder aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0" />
+                  {s.cover_image ? (
+                    <img src={s.cover_image} alt={s.headline} className="aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0 object-cover" />
+                  ) : (
+                    <div className="story-placeholder aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0" />
+                  )}
                   <div className="p-8">
                     <span className="inline-block mb-3 text-[0.6rem] tracking-[0.3em] uppercase text-crimson border border-crimson/30 px-3 py-1">
                       {s.category}
@@ -172,12 +204,9 @@ function Featured() {
                     <p className="mt-3 text-sm leading-relaxed text-warm-dim/60">
                       {s.excerpt}
                     </p>
-                    <a
-                      href="#"
-                      className="mt-4 inline-block text-[0.7rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors"
-                    >
+                    <span className="mt-4 inline-block text-[0.7rem] tracking-[0.2em] uppercase text-crimson hover:text-warm transition-colors cursor-pointer">
                       Read More &rarr;
-                    </a>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -192,13 +221,42 @@ function Featured() {
 /* ------------------------------------------------------------------ */
 /*  EVENTS / TICKETING                                                 */
 /* ------------------------------------------------------------------ */
-const EVENTS = [
+const FALLBACK_EVENTS = [
   { date: "Jul 18, 2026", name: "Afro Culture Fest", location: "Lagos, Nigeria" },
   { date: "Aug 09, 2026", name: "TheGram Live: Sound & Vision", location: "Accra, Ghana" },
   { date: "Sep 27, 2026", name: "Diaspora Connect Summit", location: "London, UK" },
 ];
 
 function HomeEvents() {
+  const [events, setEvents] = useState(FALLBACK_EVENTS);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      const { data } = await supabase
+        .from("events")
+        .select("name, date, location")
+        .eq("published", true)
+        .gte("date", new Date().toISOString())
+        .order("date", { ascending: true })
+        .limit(3);
+
+      if (data && data.length > 0) {
+        setEvents(
+          data.map((e) => ({
+            date: new Date(e.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            }),
+            name: e.name,
+            location: e.location,
+          }))
+        );
+      }
+    }
+    fetchEvents();
+  }, []);
+
   return (
     <section id="events" className="relative bg-charcoal py-28 sm:py-36 plus-field">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -215,7 +273,7 @@ function HomeEvents() {
         </div>
 
         <div className="grid gap-[1px] bg-white/5 sm:grid-cols-3">
-          {EVENTS.map((ev) => (
+          {events.map((ev) => (
             <div
               key={ev.name}
               className="group bg-charcoal hover:bg-navy p-8 sm:p-10 transition-colors duration-300 fade-in"
