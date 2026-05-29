@@ -31,7 +31,7 @@ export default function EditStoryPage() {
     body: "",
     category: "music",
     author: "",
-    cover_image: "",
+    cover_image_url: "",
     published: false,
   });
 
@@ -55,10 +55,10 @@ export default function EditStoryPage() {
         body: data.body ?? "",
         category: data.category ?? "music",
         author: data.author ?? "",
-        cover_image: data.cover_image ?? "",
+        cover_image_url: data.cover_image_url ?? "",
         published: data.published ?? false,
       });
-      if (data.cover_image) setImagePreview(data.cover_image);
+      if (data.cover_image_url) setImagePreview(data.cover_image_url);
       setFetching(false);
     }
     fetchStory();
@@ -90,7 +90,7 @@ export default function EditStoryPage() {
     const {
       data: { publicUrl },
     } = supabase.storage.from("media").getPublicUrl(path);
-    updateField("cover_image", publicUrl);
+    updateField("cover_image_url", publicUrl);
     setImagePreview(URL.createObjectURL(file));
     setUploading(false);
   }

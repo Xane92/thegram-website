@@ -18,7 +18,7 @@ export default function EditEventPage() {
     date: "",
     location: "",
     description: "",
-    cover_image: "",
+    cover_image_url: "",
     ticket_link: "",
     published: false,
   });
@@ -46,11 +46,11 @@ export default function EditEventPage() {
         date: dateVal,
         location: data.location ?? "",
         description: data.description ?? "",
-        cover_image: data.cover_image ?? "",
+        cover_image_url: data.cover_image_url ?? "",
         ticket_link: data.ticket_link ?? "",
         published: data.published ?? false,
       });
-      if (data.cover_image) setImagePreview(data.cover_image);
+      if (data.cover_image_url) setImagePreview(data.cover_image_url);
       setFetching(false);
     }
     fetchEvent();
@@ -82,7 +82,7 @@ export default function EditEventPage() {
     const {
       data: { publicUrl },
     } = supabase.storage.from("media").getPublicUrl(path);
-    updateField("cover_image", publicUrl);
+    updateField("cover_image_url", publicUrl);
     setImagePreview(URL.createObjectURL(file));
     setUploading(false);
   }

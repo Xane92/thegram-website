@@ -18,15 +18,15 @@ const CATEGORIES = [
 ];
 
 const FALLBACK_STORIES = [
-  { id: null as string | null, category: "Music", title: "The Rise of Afrobeats: From Local Sound to Global Domination", excerpt: "How a generation of artists turned a regional genre into the most streamed sound on the planet — and why the best is still ahead.", author: "Kofi Mensah", created_at: "2026-05-18", cover_image: null as string | null },
-  { id: null as string | null, category: "Culture", title: "The Festival Revolution: How Cultural Events Are Reshaping African Tourism", excerpt: "From Afrochella to Lake of Stars, a network of festivals is drawing the diaspora home and rewriting the continent's tourism playbook.", author: "Nia Adjei", created_at: "2026-05-02", cover_image: null as string | null },
-  { id: null as string | null, category: "Film", title: "Inside Nollywood's $6 Billion Creative Economy", excerpt: "The numbers behind the world's second-largest film industry and the new wave of directors pushing boundaries with global distribution deals.", author: "Chidinma Eze", created_at: "2026-05-14", cover_image: null as string | null },
-  { id: null as string | null, category: "Fashion", title: "From Accra to Paris: The African Designers Redefining Luxury Fashion", excerpt: "A new guard of designers are taking African textiles and craftsmanship to the world's most prestigious runways and retail shelves.", author: "Fatima Diallo", created_at: "2026-05-10", cover_image: null as string | null },
-  { id: null as string | null, category: "Finance", title: "Africa's Crypto Adoption Is Outpacing Every Other Continent — Here's Why", excerpt: "Across Nigeria, Kenya, and South Africa, cryptocurrency isn't speculation — it's infrastructure for a generation locked out of traditional banking.", author: "Emeka Nwosu", created_at: "2026-05-06", cover_image: null as string | null },
-  { id: null as string | null, category: "Policies", title: "The AfCFTA Effect: How Free Trade Is Redrawing Africa's Economic Map", excerpt: "The African Continental Free Trade Area is the largest free trade zone by number of countries — and it's just getting started.", author: "Kwame Asante", created_at: "2026-04-28", cover_image: null as string | null },
-  { id: null as string | null, category: "Startups", title: "How a Lagos Startup Is Revolutionizing Digital Payments Across West Africa", excerpt: "With over 40 million transactions processed in its first year, this fintech company is proving that African-built solutions can compete on the world stage.", author: "Amara Osei", created_at: "2026-05-22", cover_image: null as string | null },
-  { id: null as string | null, category: "Lifestyle", title: "The New African Traveler: Exploring the Continent on Its Own Terms", excerpt: "A growing wave of intra-African tourism is redefining travel — from luxury safaris in Rwanda to surf culture in Dakar.", author: "Zuri Mwangi", created_at: "2026-04-20", cover_image: null as string | null },
-  { id: null as string | null, category: "Music", title: "Amapiano's Next Chapter: The Producers Pushing the Sound Forward", excerpt: "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.", author: "Thabo Dlamini", created_at: "2026-04-15", cover_image: null as string | null },
+  { id: null as string | null, category: "Music", title: "The Rise of Afrobeats: From Local Sound to Global Domination", excerpt: "How a generation of artists turned a regional genre into the most streamed sound on the planet — and why the best is still ahead.", author: "Kofi Mensah", created_at: "2026-05-18", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Culture", title: "The Festival Revolution: How Cultural Events Are Reshaping African Tourism", excerpt: "From Afrochella to Lake of Stars, a network of festivals is drawing the diaspora home and rewriting the continent's tourism playbook.", author: "Nia Adjei", created_at: "2026-05-02", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Film", title: "Inside Nollywood's $6 Billion Creative Economy", excerpt: "The numbers behind the world's second-largest film industry and the new wave of directors pushing boundaries with global distribution deals.", author: "Chidinma Eze", created_at: "2026-05-14", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Fashion", title: "From Accra to Paris: The African Designers Redefining Luxury Fashion", excerpt: "A new guard of designers are taking African textiles and craftsmanship to the world's most prestigious runways and retail shelves.", author: "Fatima Diallo", created_at: "2026-05-10", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Finance", title: "Africa's Crypto Adoption Is Outpacing Every Other Continent — Here's Why", excerpt: "Across Nigeria, Kenya, and South Africa, cryptocurrency isn't speculation — it's infrastructure for a generation locked out of traditional banking.", author: "Emeka Nwosu", created_at: "2026-05-06", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Policies", title: "The AfCFTA Effect: How Free Trade Is Redrawing Africa's Economic Map", excerpt: "The African Continental Free Trade Area is the largest free trade zone by number of countries — and it's just getting started.", author: "Kwame Asante", created_at: "2026-04-28", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Startups", title: "How a Lagos Startup Is Revolutionizing Digital Payments Across West Africa", excerpt: "With over 40 million transactions processed in its first year, this fintech company is proving that African-built solutions can compete on the world stage.", author: "Amara Osei", created_at: "2026-05-22", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Lifestyle", title: "The New African Traveler: Exploring the Continent on Its Own Terms", excerpt: "A growing wave of intra-African tourism is redefining travel — from luxury safaris in Rwanda to surf culture in Dakar.", author: "Zuri Mwangi", created_at: "2026-04-20", cover_image_url: null as string | null },
+  { id: null as string | null, category: "Music", title: "Amapiano's Next Chapter: The Producers Pushing the Sound Forward", excerpt: "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.", author: "Thabo Dlamini", created_at: "2026-04-15", cover_image_url: null as string | null },
 ];
 
 function resolveCategory(param: string | null): string {
@@ -54,7 +54,7 @@ function StoriesContent() {
     async function fetchStories() {
       const { data } = await supabase
         .from("stories")
-        .select("id, title, excerpt, category, author, created_at, cover_image")
+        .select("id, title, excerpt, category, author, created_at, cover_image_url")
         .eq("published", true)
         .order("created_at", { ascending: false });
 
@@ -67,7 +67,7 @@ function StoriesContent() {
             excerpt: s.excerpt ?? "",
             author: s.author ?? "",
             created_at: s.created_at,
-            cover_image: s.cover_image,
+            cover_image_url: s.cover_image_url,
           }))
         );
       }
@@ -153,9 +153,9 @@ function StoriesContent() {
                   href={story.id ? `/stories/${story.id}` : "#"}
                   className="group bg-navy hover:bg-charcoal transition-colors duration-300 fade-in block"
                 >
-                  {story.cover_image ? (
+                  {story.cover_image_url ? (
                     <img
-                      src={story.cover_image}
+                      src={story.cover_image_url}
                       alt={story.title}
                       className="aspect-[16/9] w-full object-cover"
                     />

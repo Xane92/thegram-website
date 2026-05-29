@@ -16,7 +16,7 @@ export default function CreateEventPage() {
     date: "",
     location: "",
     description: "",
-    cover_image: "",
+    cover_image_url: "",
     ticket_link: "https://gramtickets.com",
     published: false,
   });
@@ -47,7 +47,7 @@ export default function CreateEventPage() {
     const {
       data: { publicUrl },
     } = supabase.storage.from("media").getPublicUrl(path);
-    updateField("cover_image", publicUrl);
+    updateField("cover_image_url", publicUrl);
     setImagePreview(URL.createObjectURL(file));
     setUploading(false);
   }

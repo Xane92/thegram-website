@@ -12,7 +12,7 @@ export type Story = {
   body: string;
   category: string;
   author: string;
-  cover_image: string | null;
+  cover_image_url: string | null;
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -24,7 +24,7 @@ export type SiteEvent = {
   date: string;
   location: string;
   description: string;
-  cover_image: string | null;
+  cover_image_url: string | null;
   ticket_link: string;
   published: boolean;
   created_at: string;

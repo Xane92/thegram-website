@@ -95,10 +95,10 @@ export default function StoryDetailPage() {
     <>
       {/* Hero / Cover */}
       <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 bg-charcoal overflow-hidden">
-        {story.cover_image ? (
+        {story.cover_image_url ? (
           <div className="absolute inset-0">
             <img
-              src={story.cover_image}
+              src={story.cover_image_url}
               alt={story.title}
               className="w-full h-full object-cover opacity-30"
             />
@@ -181,9 +181,9 @@ export default function StoryDetailPage() {
                   href={`/stories/${r.id}`}
                   className="group bg-charcoal hover:bg-navy transition-colors duration-300"
                 >
-                  {r.cover_image ? (
+                  {r.cover_image_url ? (
                     <img
-                      src={r.cover_image}
+                      src={r.cover_image_url}
                       alt={r.title}
                       className="aspect-[16/9] w-full object-cover"
                     />

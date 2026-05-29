@@ -64,10 +64,10 @@ export default function EventDetailPage() {
     <>
       {/* Hero */}
       <section className="relative pt-36 pb-16 sm:pt-44 sm:pb-24 bg-charcoal overflow-hidden">
-        {event.cover_image ? (
+        {event.cover_image_url ? (
           <div className="absolute inset-0">
             <img
-              src={event.cover_image}
+              src={event.cover_image_url}
               alt={event.name}
               className="w-full h-full object-cover opacity-30"
             />

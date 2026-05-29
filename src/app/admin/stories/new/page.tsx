@@ -29,7 +29,7 @@ export default function CreateStoryPage() {
     body: "",
     category: "music",
     author: "TheGram Editorial",
-    cover_image: "",
+    cover_image_url: "",
     published: false,
   });
 
@@ -59,7 +59,7 @@ export default function CreateStoryPage() {
     const {
       data: { publicUrl },
     } = supabase.storage.from("media").getPublicUrl(path);
-    updateField("cover_image", publicUrl);
+    updateField("cover_image_url", publicUrl);
     setImagePreview(URL.createObjectURL(file));
     setUploading(false);
   }

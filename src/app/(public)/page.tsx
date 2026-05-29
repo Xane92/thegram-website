@@ -106,21 +106,21 @@ const FALLBACK_STORIES = [
     category: "Music",
     headline: "The New Wave: How Amapiano Conquered Global Playlists",
     excerpt: "From the townships of Pretoria to festival stages in London and Tokyo, the genre refuses to be boxed in.",
-    cover_image: null as string | null,
+    cover_image_url: null as string | null,
   },
   {
     id: null as string | null,
     category: "Film",
     headline: "Nollywood's Next Chapter Isn't What You Think",
     excerpt: "A new class of filmmakers are redefining narrative on their own terms.",
-    cover_image: null as string | null,
+    cover_image_url: null as string | null,
   },
   {
     id: null as string | null,
     category: "Startups",
     headline: "Building in Lagos: The Founders Rewriting the Playbook",
     excerpt: "Inside the ecosystem producing Africa's most ambitious tech companies.",
-    cover_image: null as string | null,
+    cover_image_url: null as string | null,
   },
 ];
 
@@ -131,7 +131,7 @@ function Featured() {
     async function fetchFeatured() {
       const { data } = await supabase
         .from("stories")
-        .select("id, title, excerpt, category, cover_image")
+        .select("id, title, excerpt, category, cover_image_url")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(3);
@@ -143,7 +143,7 @@ function Featured() {
             category: (s.category ?? "").charAt(0).toUpperCase() + (s.category ?? "").slice(1),
             headline: s.title,
             excerpt: s.excerpt ?? "",
-            cover_image: s.cover_image,
+            cover_image_url: s.cover_image_url,
           }))
         );
       }
@@ -168,8 +168,8 @@ function Featured() {
             href={stories[0]?.id ? `/stories/${stories[0].id}` : "/stories"}
             className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in"
           >
-            {stories[0]?.cover_image ? (
-              <img src={stories[0].cover_image} alt={stories[0].headline} className="aspect-[4/3] w-full object-cover" />
+            {stories[0]?.cover_image_url ? (
+              <img src={stories[0].cover_image_url} alt={stories[0].headline} className="aspect-[4/3] w-full object-cover" />
             ) : (
               <div className="story-placeholder aspect-[4/3] w-full" />
             )}
@@ -197,8 +197,8 @@ function Featured() {
                 className="group relative bg-navy hover:bg-charcoal transition-colors duration-300 fade-in"
               >
                 <div className="flex flex-col sm:flex-row">
-                  {s.cover_image ? (
-                    <img src={s.cover_image} alt={s.headline} className="aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0 object-cover" />
+                  {s.cover_image_url ? (
+                    <img src={s.cover_image_url} alt={s.headline} className="aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0 object-cover" />
                   ) : (
                     <div className="story-placeholder aspect-[16/10] sm:aspect-square sm:w-48 lg:w-56 shrink-0" />
                   )}
