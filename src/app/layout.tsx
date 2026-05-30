@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TheGram — Stories of African Greatness",
+  title: "THEGRAM — Stories of African Greatness",
   description:
-    "TheGram is a premium African culture and lifestyle media platform covering music, film, fashion, events, business, and more.",
+    "THEGRAM is the blueprint of greatness. A premium African culture and media platform covering music, film, fashion, events, business, and more.",
   keywords: [
     "African culture",
     "Afrobeats",

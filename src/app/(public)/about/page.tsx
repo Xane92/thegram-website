@@ -71,7 +71,7 @@ export default function AboutPage() {
                 are stories that deserve a platform equal to their ambition.
               </p>
               <p>
-                We are the blueprint for a new generation of dreamers. Not a
+                We are the blueprint of greatness. Not a
                 news wire, not an aggregator — an editorial platform built with
                 the same care, craft, and intentionality as the culture we
                 cover. Every piece we publish is a deliberate act of

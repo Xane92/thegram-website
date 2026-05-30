@@ -40,10 +40,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <span className="font-serif text-2xl font-bold tracking-[0.2em] text-warm">
-            THE GRAM
-            <sup className="text-[0.55em] text-crimson align-super ml-0.5">
-              co
-            </sup>
+            THEGRAM
           </span>
           <p className="mt-2 text-xs tracking-[0.3em] uppercase text-warm-dim/40">
             Admin Dashboard

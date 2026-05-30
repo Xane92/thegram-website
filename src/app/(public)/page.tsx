@@ -22,7 +22,7 @@ function Hero() {
           <span className="gradient-text">Greatness</span>
         </h1>
         <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-warm-dim/70 sm:text-xl">
-          The blueprint for a new generation of dreamers.
+          The blueprint of greatness.
         </p>
         <a
           href="#featured"

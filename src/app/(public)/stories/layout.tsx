@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Stories | TheGram — African Breakthroughs & Success",
+  title: "Stories | THEGRAM — The Blueprint of Greatness",
   description:
-    "Breakthroughs, triumphs, and the voices shaping Africa's future. Read stories of greatness across music, culture, film, fashion, finance, and business.",
+    "The blueprint of greatness. Read stories of African greatness across music, culture, film, fashion, finance, and business.",
 };
 
 export default function StoriesLayout({

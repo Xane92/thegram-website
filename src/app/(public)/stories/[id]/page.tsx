@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase, type Story } from "@/lib/supabase";
+import { supabase, type Story, type StoryImage } from "@/lib/supabase";
 
 export default function StoryDetailPage() {
   const params = useParams<{ id: string }>();
@@ -158,6 +158,30 @@ export default function StoryDetailPage() {
               Full story content coming soon.
             </p>
           )}
+
+          {(() => {
+            const imgs = (story.images ?? []) as StoryImage[];
+            const sorted = [...imgs].sort((a, b) => a.order - b.order);
+            if (sorted.length === 0) return null;
+            return (
+              <div className="mt-12 space-y-10">
+                {sorted.map((img, i) => (
+                  <figure key={i}>
+                    <img
+                      src={img.url}
+                      alt={img.caption || `Story image ${i + 1}`}
+                      className="w-full object-cover border border-white/5"
+                    />
+                    {img.caption && (
+                      <figcaption className="mt-3 text-sm italic text-warm-dim/40">
+                        {img.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </section>
 

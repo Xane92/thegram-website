@@ -28,18 +28,15 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="flex flex-col leading-none">
               <span className="font-serif text-xl font-bold tracking-[0.2em] text-warm">
-                THE GRAM
-                <sup className="text-[0.55em] text-crimson align-super ml-0.5">
-                  co
-                </sup>
+                THEGRAM
               </span>
               <span className="text-[0.6rem] tracking-[0.35em] uppercase text-warm-dim/60 mt-0.5">
-                Lifestyle Branding
+                Stories of African Greatness
               </span>
             </Link>
             <p className="mt-6 text-sm leading-relaxed text-warm-dim/40 max-w-xs">
-              The premium editorial platform for African culture, music, and
-              lifestyle.
+              The blueprint of greatness. A premium editorial platform for
+              African culture, music, and stories.
             </p>
           </div>
 
