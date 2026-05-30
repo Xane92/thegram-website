@@ -5,11 +5,9 @@ export const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZ3R6d3Rvb3VjdXpvZnRrYndkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwMDY4MjYsImV4cCI6MjA5NTU4MjgyNn0.wk919QghQWa4-SfmtMvYjzwoTd-hdD8CrNnZHlq1vQg"
 );
 
-export type StoryImage = {
-  url: string;
-  caption: string;
-  order: number;
-};
+export type TextBlock = { type: "text"; content: string };
+export type ImageBlock = { type: "image"; url: string; caption: string };
+export type ContentBlock = TextBlock | ImageBlock;
 
 export type Story = {
   id: string;
@@ -19,7 +17,6 @@ export type Story = {
   category: string;
   author: string;
   cover_image_url: string | null;
-  images: StoryImage[];
   published: boolean;
   created_at: string;
   updated_at: string;

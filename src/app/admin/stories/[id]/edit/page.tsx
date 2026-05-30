@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { supabase, type StoryImage } from "@/lib/supabase";
+import { supabase, type ContentBlock } from "@/lib/supabase";
 
 const CATEGORIES = [
   "music",
@@ -16,6 +16,69 @@ const CATEGORIES = [
   "lifestyle",
 ];
 
+function parseBodyBlocks(body: string | null): ContentBlock[] {
+  if (!body) return [];
+  try {
+    const parsed = JSON.parse(body);
+    if (Array.isArray(parsed)) return parsed as ContentBlock[];
+  } catch {
+    // plain string — wrap as a single text block
+  }
+  return body.trim() ? [{ type: "text", content: body }] : [];
+}
+
+function InsertMenu({
+  onAdd,
+}: {
+  onAdd: (type: "text" | "image") => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="flex justify-center py-2">
+      {open ? (
+        <div className="flex gap-2 items-center">
+          <button
+            type="button"
+            onClick={() => {
+              onAdd("text");
+              setOpen(false);
+            }}
+            className="px-3 py-1.5 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+          >
+            + Text
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onAdd("image");
+              setOpen(false);
+            }}
+            className="px-3 py-1.5 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+          >
+            + Image
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="px-2 py-1.5 text-xs text-warm-dim/30 hover:text-warm-dim/60 transition-colors"
+          >
+            &times;
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-8 h-8 flex items-center justify-center text-warm-dim/20 hover:text-crimson/60 border border-transparent hover:border-white/10 rounded-full transition-all"
+        >
+          +
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function EditStoryPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -26,14 +89,13 @@ export default function EditStoryPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
 
-  const [storyImages, setStoryImages] = useState<StoryImage[]>([]);
-  const [uploadingStoryImage, setUploadingStoryImage] = useState(false);
+  const [blocks, setBlocks] = useState<ContentBlock[]>([]);
+  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
   const [removeTarget, setRemoveTarget] = useState<number | null>(null);
 
   const [form, setForm] = useState({
     title: "",
     excerpt: "",
-    body: "",
     category: "music",
     author: "",
     cover_image_url: "",
@@ -57,7 +119,6 @@ export default function EditStoryPage() {
       setForm({
         title: data.title ?? "",
         excerpt: data.excerpt ?? "",
-        body: data.body ?? "",
         category: data.category ?? "music",
         author: data.author ?? "",
         cover_image_url: data.cover_image_url ?? "",
@@ -65,13 +126,7 @@ export default function EditStoryPage() {
       });
       if (data.cover_image_url) setImagePreview(data.cover_image_url);
 
-      const imgs = data.images ?? [];
-      setStoryImages(
-        (imgs as StoryImage[]).sort(
-          (a: StoryImage, b: StoryImage) => a.order - b.order
-        )
-      );
-
+      setBlocks(parseBodyBlocks(data.body));
       setFetching(false);
     }
     fetchStory();
@@ -81,7 +136,7 @@ export default function EditStoryPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -108,7 +163,7 @@ export default function EditStoryPage() {
     setUploading(false);
   }
 
-  async function handleImageRemove() {
+  async function handleCoverRemove() {
     if (!form.cover_image_url) return;
     const path = form.cover_image_url.split("/media/")[1];
     if (path) await supabase.storage.from("media").remove([path]);
@@ -116,16 +171,63 @@ export default function EditStoryPage() {
     setImagePreview(null);
   }
 
-  async function handleStoryImageUpload(
+  function addBlock(type: "text" | "image", atIndex?: number) {
+    const newBlock: ContentBlock =
+      type === "text"
+        ? { type: "text", content: "" }
+        : { type: "image", url: "", caption: "" };
+    setBlocks((prev) => {
+      const next = [...prev];
+      const idx = atIndex !== undefined ? atIndex : next.length;
+      next.splice(idx, 0, newBlock);
+      return next;
+    });
+  }
+
+  function updateBlock(
+    index: number,
+    updates: Record<string, string>
+  ) {
+    setBlocks((prev) =>
+      prev.map((b, i) => {
+        if (i !== index) return b;
+        if (b.type === "text") return { ...b, ...updates } as ContentBlock;
+        return { ...b, ...updates } as ContentBlock;
+      })
+    );
+  }
+
+  function moveBlock(index: number, direction: "up" | "down") {
+    setBlocks((prev) => {
+      const next = [...prev];
+      const swapIndex = direction === "up" ? index - 1 : index + 1;
+      if (swapIndex < 0 || swapIndex >= next.length) return prev;
+      [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
+      return next;
+    });
+  }
+
+  async function removeBlock(index: number) {
+    const block = blocks[index];
+    if (block.type === "image" && block.url) {
+      const path = block.url.split("/media/")[1];
+      if (path) await supabase.storage.from("media").remove([path]);
+    }
+    setBlocks((prev) => prev.filter((_, i) => i !== index));
+    setRemoveTarget(null);
+  }
+
+  async function handleBlockImageUpload(
+    index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingStoryImage(true);
+    setUploadingBlock(index);
     setError("");
     const ext = file.name.split(".").pop();
-    const path = `stories/${Date.now()}-img.${ext}`;
+    const path = `stories/${Date.now()}-blk.${ext}`;
 
     const { error: uploadErr } = await supabase.storage
       .from("media")
@@ -133,48 +235,15 @@ export default function EditStoryPage() {
 
     if (uploadErr) {
       setError(uploadErr.message);
-      setUploadingStoryImage(false);
+      setUploadingBlock(null);
       return;
     }
 
     const {
       data: { publicUrl },
     } = supabase.storage.from("media").getPublicUrl(path);
-
-    setStoryImages((prev) => [
-      ...prev,
-      { url: publicUrl, caption: "", order: prev.length },
-    ]);
-    setUploadingStoryImage(false);
-    e.target.value = "";
-  }
-
-  function updateCaption(index: number, caption: string) {
-    setStoryImages((prev) =>
-      prev.map((img, i) => (i === index ? { ...img, caption } : img))
-    );
-  }
-
-  function moveImage(index: number, direction: "up" | "down") {
-    setStoryImages((prev) => {
-      const next = [...prev];
-      const swapIndex = direction === "up" ? index - 1 : index + 1;
-      if (swapIndex < 0 || swapIndex >= next.length) return prev;
-      [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-      return next.map((img, i) => ({ ...img, order: i }));
-    });
-  }
-
-  async function handleStoryImageRemove(index: number) {
-    const img = storyImages[index];
-    const path = img.url.split("/media/")[1];
-    if (path) await supabase.storage.from("media").remove([path]);
-    setStoryImages((prev) =>
-      prev
-        .filter((_, i) => i !== index)
-        .map((img, i) => ({ ...img, order: i }))
-    );
-    setRemoveTarget(null);
+    updateBlock(index, { url: publicUrl });
+    setUploadingBlock(null);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -184,7 +253,7 @@ export default function EditStoryPage() {
 
     const { error: updateErr } = await supabase
       .from("stories")
-      .update({ ...form, images: storyImages })
+      .update({ ...form, body: JSON.stringify(blocks) })
       .eq("id", params.id);
 
     if (updateErr) {
@@ -243,18 +312,6 @@ export default function EditStoryPage() {
 
         <div>
           <label className="block text-xs tracking-[0.15em] uppercase text-warm-dim/50 mb-2">
-            Body
-          </label>
-          <textarea
-            value={form.body}
-            onChange={(e) => updateField("body", e.target.value)}
-            rows={12}
-            className="w-full bg-charcoal border border-white/10 px-4 py-3 text-sm text-warm placeholder:text-warm-dim/30 focus:outline-none focus:border-crimson/50 focus:ring-1 focus:ring-crimson/50 resize-y"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-[0.15em] uppercase text-warm-dim/50 mb-2">
             Category
           </label>
           <select
@@ -306,7 +363,7 @@ export default function EditStoryPage() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={handleCoverUpload}
                 className="w-full bg-charcoal border border-white/10 px-4 py-3 text-sm text-warm-dim/50 file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:bg-crimson/20 file:text-crimson file:cursor-pointer"
               />
               {uploading && (
@@ -316,80 +373,160 @@ export default function EditStoryPage() {
           )}
         </div>
 
-        {/* Story Images */}
+        {/* Story Content — Block Editor */}
         <div>
           <label className="block text-xs tracking-[0.15em] uppercase text-warm-dim/50 mb-2">
-            Story Images
+            Story Content
           </label>
           <p className="text-xs text-warm-dim/30 mb-4">
-            Add images that appear within the story body. Each can have a
-            caption.
+            Build your story with text and image blocks. Add, reorder, and
+            remove blocks freely.
           </p>
 
-          {storyImages.length > 0 && (
-            <div className="space-y-4 mb-4">
-              {storyImages.map((img, index) => (
-                <div
-                  key={img.url}
-                  className="bg-charcoal border border-white/10 p-4"
-                >
-                  <div className="flex gap-4">
-                    <img
-                      src={img.url}
-                      alt={img.caption || `Image ${index + 1}`}
-                      className="w-24 h-24 object-cover shrink-0 border border-white/10"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <input
-                        type="text"
-                        value={img.caption}
-                        onChange={(e) => updateCaption(index, e.target.value)}
-                        placeholder="Image caption (e.g. Lagos skyline — Photo by John Doe)"
-                        className="w-full bg-navy border border-white/10 px-3 py-2 text-sm text-warm placeholder:text-warm-dim/30 focus:outline-none focus:border-crimson/50 focus:ring-1 focus:ring-crimson/50"
-                      />
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, "up")}
-                          disabled={index === 0}
-                          className="px-2 py-1 text-xs text-warm-dim/50 border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          &uarr; Up
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, "down")}
-                          disabled={index === storyImages.length - 1}
-                          className="px-2 py-1 text-xs text-warm-dim/50 border border-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          &darr; Down
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRemoveTarget(index)}
-                          className="px-2 py-1 text-xs text-red-400 border border-red-500/20 hover:border-red-500/40 transition-colors ml-auto"
-                        >
-                          Remove
-                        </button>
-                      </div>
+          <div className="border border-white/10 bg-navy/50 p-4 min-h-[120px]">
+            {blocks.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <p className="text-sm text-warm-dim/30">
+                  No content blocks yet.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => addBlock("text")}
+                    className="px-4 py-2 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+                  >
+                    + Add Text Block
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => addBlock("image")}
+                    className="px-4 py-2 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+                  >
+                    + Add Image Block
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {blocks.map((block, index) => (
+              <div key={index}>
+                {index === 0 && (
+                  <InsertMenu
+                    onAdd={(type) => addBlock(type, 0)}
+                  />
+                )}
+                <div className="bg-charcoal border border-white/10 mb-1">
+                  {/* Block header */}
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[0.6rem] tracking-[0.15em] uppercase text-warm-dim/40">
+                        {block.type === "text" ? "Text" : "Image"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => moveBlock(index, "up")}
+                        disabled={index === 0}
+                        className="px-1.5 py-0.5 text-xs text-warm-dim/40 hover:text-warm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        &uarr;
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveBlock(index, "down")}
+                        disabled={index === blocks.length - 1}
+                        className="px-1.5 py-0.5 text-xs text-warm-dim/40 hover:text-warm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        &darr;
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (block.type === "image" && block.url) {
+                            setRemoveTarget(index);
+                          } else {
+                            removeBlock(index);
+                          }
+                        }}
+                        className="px-1.5 py-0.5 text-xs text-red-400/60 hover:text-red-400 transition-colors ml-1"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleStoryImageUpload}
-            className="w-full bg-charcoal border border-white/10 px-4 py-3 text-sm text-warm-dim/50 file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:bg-crimson/20 file:text-crimson file:cursor-pointer"
-          />
-          {uploadingStoryImage && (
-            <p className="mt-2 text-xs text-warm-dim/40">
-              Uploading image...
-            </p>
-          )}
+                  {/* Block body */}
+                  <div className="p-3">
+                    {block.type === "text" ? (
+                      <textarea
+                        value={block.content}
+                        onChange={(e) =>
+                          updateBlock(index, { content: e.target.value })
+                        }
+                        rows={4}
+                        className="w-full bg-navy border border-white/10 px-4 py-3 text-sm text-warm placeholder:text-warm-dim/30 focus:outline-none focus:border-crimson/50 focus:ring-1 focus:ring-crimson/50 resize-y min-h-[100px]"
+                        placeholder="Write your text here..."
+                      />
+                    ) : block.url ? (
+                      <div>
+                        <img
+                          src={block.url}
+                          alt={block.caption || "Block image"}
+                          className="max-h-48 object-cover border border-white/10 mb-3"
+                        />
+                        <input
+                          type="text"
+                          value={block.caption}
+                          onChange={(e) =>
+                            updateBlock(index, { caption: e.target.value })
+                          }
+                          placeholder="Image caption (e.g. Lagos skyline — Photo by John Doe)"
+                          className="w-full bg-navy border border-white/10 px-3 py-2 text-sm text-warm placeholder:text-warm-dim/30 focus:outline-none focus:border-crimson/50 focus:ring-1 focus:ring-crimson/50"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleBlockImageUpload(index, e)}
+                          className="w-full bg-navy border border-white/10 px-4 py-3 text-sm text-warm-dim/50 file:mr-4 file:py-1 file:px-4 file:border-0 file:text-sm file:bg-crimson/20 file:text-crimson file:cursor-pointer"
+                        />
+                        {uploadingBlock === index && (
+                          <p className="mt-2 text-xs text-warm-dim/40">
+                            Uploading...
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <InsertMenu
+                  onAdd={(type) => addBlock(type, index + 1)}
+                />
+              </div>
+            ))}
+
+            {blocks.length > 0 && (
+              <div className="flex gap-2 justify-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => addBlock("text")}
+                  className="px-3 py-1.5 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+                >
+                  + Text Block
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addBlock("image")}
+                  className="px-3 py-1.5 text-xs tracking-[0.1em] uppercase bg-white/5 text-warm-dim/60 hover:bg-white/10 hover:text-warm transition-colors"
+                >
+                  + Image Block
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -445,7 +582,7 @@ export default function EditStoryPage() {
               </button>
               <button
                 onClick={() => {
-                  handleImageRemove();
+                  handleCoverRemove();
                   setShowRemoveModal(false);
                 }}
                 className="px-5 py-2 text-xs tracking-[0.1em] uppercase bg-red-600 hover:bg-red-700 text-white transition-colors"
@@ -457,12 +594,13 @@ export default function EditStoryPage() {
         </div>
       )}
 
-      {/* Story image remove modal */}
+      {/* Block image remove modal */}
       {removeTarget !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-charcoal border border-white/10 p-6 max-w-sm w-full mx-4">
             <p className="text-sm text-warm mb-6">
-              Are you sure you want to remove this image?
+              Are you sure you want to remove this image block? The image will
+              be deleted from storage.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -472,7 +610,7 @@ export default function EditStoryPage() {
                 Cancel
               </button>
               <button
-                onClick={() => handleStoryImageRemove(removeTarget)}
+                onClick={() => removeBlock(removeTarget)}
                 className="px-5 py-2 text-xs tracking-[0.1em] uppercase bg-red-600 hover:bg-red-700 text-white transition-colors"
               >
                 Yes, Remove

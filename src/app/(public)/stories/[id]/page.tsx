@@ -3,7 +3,18 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase, type Story, type StoryImage } from "@/lib/supabase";
+import { supabase, type Story, type ContentBlock } from "@/lib/supabase";
+
+function parseBody(body: string | null): ContentBlock[] | null {
+  if (!body) return null;
+  try {
+    const parsed = JSON.parse(body);
+    if (Array.isArray(parsed)) return parsed as ContentBlock[];
+  } catch {
+    // plain string
+  }
+  return null;
+}
 
 export default function StoryDetailPage() {
   const params = useParams<{ id: string }>();
@@ -142,44 +153,61 @@ export default function StoryDetailPage() {
 
       {/* Body */}
       <section className="bg-navy py-16 sm:py-24">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-[720px] px-6">
           {story.excerpt && (
-            <p className="text-lg sm:text-xl leading-relaxed text-warm-dim/70 mb-10 font-serif italic border-l-2 border-crimson/30 pl-6">
+            <p className="text-lg sm:text-xl leading-relaxed text-warm-dim/70 mb-12 font-serif italic border-l-2 border-crimson/30 pl-6">
               {story.excerpt}
             </p>
           )}
 
-          {story.body ? (
-            <div className="prose-dark text-base leading-relaxed text-warm-dim/60 whitespace-pre-line">
-              {story.body}
-            </div>
-          ) : (
-            <p className="text-warm-dim/30 text-sm italic">
-              Full story content coming soon.
-            </p>
-          )}
-
           {(() => {
-            const imgs = (story.images ?? []) as StoryImage[];
-            const sorted = [...imgs].sort((a, b) => a.order - b.order);
-            if (sorted.length === 0) return null;
+            const blocks = parseBody(story.body);
+
+            if (blocks) {
+              return (
+                <div className="space-y-10">
+                  {blocks.map((block, i) =>
+                    block.type === "text" ? (
+                      <div
+                        key={i}
+                        className="text-[1.05rem] leading-[1.9] text-warm-dim/65 whitespace-pre-line"
+                      >
+                        {block.content}
+                      </div>
+                    ) : (
+                      <figure
+                        key={i}
+                        className="border-b border-white/5 pb-8"
+                      >
+                        <img
+                          src={block.url}
+                          alt={block.caption || `Story image ${i + 1}`}
+                          className="w-full object-cover"
+                        />
+                        {block.caption && (
+                          <figcaption className="mt-3 text-sm italic text-warm-dim/40">
+                            {block.caption}
+                          </figcaption>
+                        )}
+                      </figure>
+                    )
+                  )}
+                </div>
+              );
+            }
+
+            if (story.body) {
+              return (
+                <div className="text-[1.05rem] leading-[1.9] text-warm-dim/65 whitespace-pre-line">
+                  {story.body}
+                </div>
+              );
+            }
+
             return (
-              <div className="mt-12 space-y-10">
-                {sorted.map((img, i) => (
-                  <figure key={i}>
-                    <img
-                      src={img.url}
-                      alt={img.caption || `Story image ${i + 1}`}
-                      className="w-full object-cover border border-white/5"
-                    />
-                    {img.caption && (
-                      <figcaption className="mt-3 text-sm italic text-warm-dim/40">
-                        {img.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ))}
-              </div>
+              <p className="text-warm-dim/30 text-sm italic">
+                Full story content coming soon.
+              </p>
             );
           })()}
         </div>
